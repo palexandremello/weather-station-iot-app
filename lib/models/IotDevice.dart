@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:core';
 
-class IotDevice {
+import 'package:flutter/widgets.dart';
+
+class IotDevice with ChangeNotifier {
   String device;
   DateTime timestamp;
   double humidity;

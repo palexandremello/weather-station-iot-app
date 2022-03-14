@@ -1,6 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:weather_station_iot_app/models/IotDevice.dart';
-import 'package:weather_station_iot_app/views/home/repository/iot_device_http_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:weather_station_iot_app/providers/iot_device_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,41 +12,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    super.initState();
+    final iotDevices = Provider.of<IotDeviceProvider>(context, listen: false);
+    iotDevices.getIotDevicesData(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final iotDeviceHttpRepository = IotDeviceHttpRepository();
+    final iotDevices = Provider.of<IotDeviceProvider>(context);
+
     return Scaffold(
-      body: FutureBuilder<List<IotDevice>>(
-          future: iotDeviceHttpRepository.findAllDevices(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: Text('Loading..'));
-            } else {
-              return DataTable(
-                  columns: _createBookTableColumns(),
-                  rows: _createBookTableRows(snapshot.data ?? []));
-            }
-          }),
-    );
-  }
-
-  List<DataColumn> _createBookTableColumns() {
-    return [
-      const DataColumn(
-          label: Text(
-        'Serial Number',
-      )),
-      const DataColumn(label: Text('Device')),
-      const DataColumn(label: Text('Temperature')),
-    ];
-  }
-
-  List<DataRow> _createBookTableRows(List<IotDevice> iotdevices) {
-    return iotdevices
-        .map((iotdevice) => DataRow(cells: [
-              DataCell(Text(iotdevice.serialNumber.toString())),
-              DataCell(Text(iotdevice.device.toString())),
-              DataCell(Text(iotdevice.temperature.toString())),
-            ]))
-        .toList();
+        appBar: AppBar(
+          title: const Text("IOT DEVICES"),
+        ),
+        body: SafeArea(
+          child: PageView(
+            children: <Widget>[
+              PieChart(
+                PieChartData(
+                  sections: data,
+                  centerSpaceRadius: 45,
+                  sectionsSpace: 10,
+                ),
+              )
+            ],
+          ),
+        ));
   }
 }
+
+List<PieChartSectionData> data = [
+  PieChartSectionData(title: "A", color: Colors.red),
+  PieChartSectionData(title: "B", color: Colors.blue),
+  PieChartSectionData(title: "C", color: Colors.yellow),
+  PieChartSectionData(title: "D", color: Colors.green)
+];
